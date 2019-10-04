@@ -6,7 +6,7 @@ pygame.init()
 
 #inicio da tela
 pygame.init()
-relogio = pygame.time.Clock()
+#relogio = pygame.time.Clock()
 pygame.display.set_caption("Bomber")
 tela = pygame.display.set_mode((1344,704)) #720), pygame.FULLSCREEN)
 tela.fill((0,0,0))
@@ -29,13 +29,17 @@ bomber.append([pygame.image.load('Recursos/f_bomber.png'), 1088, 576-26])
 def Dist(ponto1, ponto2):
     return math.sqrt( (ponto1[0] - ponto2[0])**2 + (ponto1[1] - ponto2[1])**2 )
 
-def colisao(tipo, id):
-    global bomber, monstros
-    if tipo == 0:
-        pass
-    elif tipo == 1:
-        pass
-    return 0
+def Colisao(x, y):
+    global pontos_fixos, matriz
+    pts_lados = [[x-28,y-28], [x+32,y-28], [x+32,y+28], [x-32,y+28]]
+    for p in pts_lados:
+        for i in range(len(pontos_fixos)):
+            for j in range(len(pontos_fixos[0])):
+                if pontos_fixos[i][j] != 0:
+                    if matriz[i][j][0] < p[0] < (matriz[i][j][0] + 64):
+                        if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
+                            return True
+    return False
 
 def Menu():
     pass
@@ -100,24 +104,46 @@ def Principal():
         key = pygame.key.get_pressed()
 
         #movimento personagem 1:
+        conseguiu = [False, False]
+        X, Y = bomber[0][1], bomber[0][2]
         if key[pygame.K_w]:
-            bomber[0][2] -= 3
+            Y -= 1
         if key[pygame.K_s]:
-            bomber[0][2] += 3
+            Y += 1
+        if not Colisao(X+32, Y+32):
+            conseguiu[0] = True
         if key[pygame.K_a]:
-            bomber[0][1] -= 3
+            X -= 1
         if key[pygame.K_d]:
-            bomber[0][1] += 3
+            X += 1
+        if not Colisao(X+32, bomber[0][2]+32):
+            conseguiu[1] = True
 
+        if conseguiu[0]:
+            bomber[0][2] = Y
+        if conseguiu[1]:
+            bomber[0][1] = X
+
+        conseguiu = [False, False]
+        X, Y = bomber[1][1], bomber[1][2]
         #movimento personagem 2:
         if key[pygame.K_UP]:
-            bomber[1][2] -= 3
+            Y -= 3
         if key[pygame.K_DOWN]:
-            bomber[1][2] += 3
+            Y += 3
+        if not Colisao(X+32, Y+32):
+            conseguiu[0] = True
         if key[pygame.K_LEFT]:
-            bomber[1][1] -= 3
+            X -= 3
         if key[pygame.K_RIGHT]:
-            bomber[1][1] += 3
+            X += 3
+        if not Colisao(X+32, bomber[1][2]+32):
+            conseguiu[1] = True
+        
+        if conseguiu[0]:
+            bomber[1][2] = Y
+        if conseguiu[1]:
+            bomber[1][1] = X
 
         #bombas:
         if key[pygame.K_x] and ok_press[0]:
@@ -171,10 +197,10 @@ def Principal():
             tela.blit(imgs[4], (bomba[0], bomba[1]))
 
         for b in bomber:
-            tela.blit(b[0], (b[1], b[2]))
+            tela.blit(imgs[3], (b[1], b[2]))
 
         pygame.display.update()
-        relogio.tick(60)
+        #relogio.tick(60)
 
 Principal()
 
