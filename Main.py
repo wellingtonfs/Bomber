@@ -8,7 +8,7 @@ pygame.init()
 pygame.init()
 #relogio = pygame.time.Clock()
 pygame.display.set_caption("Bomber")
-tela = pygame.display.set_mode((1344,704)) #720), pygame.FULLSCREEN)
+tela = pygame.display.set_mode((1344,704)) #, pygame.FULLSCREEN)
 tela.fill((0,0,0))
 
 imgs = []
@@ -23,15 +23,15 @@ matriz = []
 bomber = []
 monstros = []
 bombas = []
-bomber.append([pygame.image.load('Recursos/f_bomber.png'), 64, 64-26]) #26 = altura dele - 64: 90 - 64
-bomber.append([pygame.image.load('Recursos/f_bomber.png'), 1088, 576-26])
+bomber.append([pygame.image.load('Recursos/f_bomber.png'), 64, 64]) #26 = altura dele - 64: 90 - 64
+bomber.append([pygame.image.load('Recursos/f_bomber.png'), 1088, 576])
 
 def Dist(ponto1, ponto2):
     return math.sqrt( (ponto1[0] - ponto2[0])**2 + (ponto1[1] - ponto2[1])**2 )
 
-def Colisao(x, y):
-    global pontos_fixos, matriz
-    pts_lados = [[x-28,y-28], [x+32,y-28], [x+32,y+28], [x-32,y+28]]
+def Colisao(x, y, b):
+    global pontos_fixos, matriz, bomber
+    pts_lados = [[x-28,y-28], [x+28,y-28], [x+28,y+28], [x-28,y+28]]
     for p in pts_lados:
         for i in range(len(pontos_fixos)):
             for j in range(len(pontos_fixos[0])):
@@ -39,6 +39,13 @@ def Colisao(x, y):
                     if matriz[i][j][0] < p[0] < (matriz[i][j][0] + 64):
                         if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
                             return True
+    
+    if b == 0:
+        pt = [bomber[1][1] + 32, bomber[1][2] + 32]
+    else:
+        pt = [bomber[0][1] + 32, bomber[0][2] + 32]
+    if Dist(pt, [x, y]) < 64:
+        return True
     return False
 
 def Menu():
@@ -87,12 +94,20 @@ def Inicio_Listas():
         if tr:
             i -= 1
         else:
-            pontos_fixos[x][y] = 0
+            pontos_fixos[x][y] = 2
+    
+    for bb in bomber:
+        for i in range(len(pontos_fixos)):
+            for j in range(len(pontos_fixos[0])):
+                if Dist([bb[1], bb[2]], matriz[i][j]) < 100:
+                    if pontos_fixos[i][j] == 2:
+                        pontos_fixos[i][j] = 0
 
 def Principal():
     loop = True
     Inicio_Listas()
     ok_press = [True, True]
+    v_and, v_and2 = 27, 27
     while loop:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -104,46 +119,100 @@ def Principal():
         key = pygame.key.get_pressed()
 
         #movimento personagem 1:
-        conseguiu = [False, False]
+        conseguiu = [False, False, False, False]
         X, Y = bomber[0][1], bomber[0][2]
         if key[pygame.K_w]:
-            Y -= 1
+            Y -= 3
+            conseguiu[2] = True
         if key[pygame.K_s]:
-            Y += 1
-        if not Colisao(X+32, Y+32):
+            Y += 3
+            conseguiu[2] = True
+        if not Colisao(X+32, Y+32, 0) and conseguiu[2]:
             conseguiu[0] = True
         if key[pygame.K_a]:
-            X -= 1
+            X -= 3
+            conseguiu[3] = True
         if key[pygame.K_d]:
-            X += 1
-        if not Colisao(X+32, bomber[0][2]+32):
+            X += 3
+            conseguiu[3] = True
+        if not Colisao(X+32, bomber[0][2]+32, 0) and conseguiu[3]:
             conseguiu[1] = True
 
-        if conseguiu[0]:
-            bomber[0][2] = Y
-        if conseguiu[1]:
+        #tratar os dados
+        if conseguiu[0] and conseguiu[1]:
             bomber[0][1] = X
+            bomber[0][2] = Y
+            v_and = 27
+        elif conseguiu[0]:
+            bomber[0][2] = Y
+            v_and = 27
+        elif conseguiu[1]:
+            bomber[0][1] = X
+            v_and = 27
+        elif conseguiu[2]: #tentou andar
+            if not Colisao(X+32+v_and, bomber[0][2], 0):
+                bomber[0][1] += 3
+            elif not Colisao(X+32-v_and, bomber[0][2], 0):
+                bomber[0][1] -= 3
+            v_and -= 3
+            if v_and < 0:
+                v_and = 27
+        elif conseguiu[3]: #tentou andar
+            if not Colisao(X+32, Y+32+v_and, 0):
+                bomber[0][2] += 3
+            elif not Colisao(X+32, Y+32-v_and, 0):
+                bomber[0][2] -= 3
+            v_and -= 3
+            if v_and < 0:
+                v_and = 27
 
-        conseguiu = [False, False]
-        X, Y = bomber[1][1], bomber[1][2]
         #movimento personagem 2:
+        conseguiu = [False, False, False, False]
+        X, Y = bomber[1][1], bomber[1][2]
         if key[pygame.K_UP]:
             Y -= 3
+            conseguiu[2] = True
         if key[pygame.K_DOWN]:
             Y += 3
-        if not Colisao(X+32, Y+32):
+            conseguiu[2] = True
+        if not Colisao(X+32, Y+32, 1) and conseguiu[2]:
             conseguiu[0] = True
         if key[pygame.K_LEFT]:
             X -= 3
+            conseguiu[3] = True
         if key[pygame.K_RIGHT]:
             X += 3
-        if not Colisao(X+32, bomber[1][2]+32):
+            conseguiu[3] = True
+        if not Colisao(X+32, bomber[1][2]+32, 1) and conseguiu[3]:
             conseguiu[1] = True
-        
-        if conseguiu[0]:
-            bomber[1][2] = Y
-        if conseguiu[1]:
+
+        #tratar os dados
+        if conseguiu[0] and conseguiu[1]:
             bomber[1][1] = X
+            bomber[1][2] = Y
+            v_and2 = 27
+        elif conseguiu[0]:
+            bomber[1][2] = Y
+            v_and2 = 27
+        elif conseguiu[1]:
+            bomber[1][1] = X
+            v_and2 = 27
+        elif conseguiu[2]: #tentou andar
+            if not Colisao(X+32+v_and2, bomber[1][2], 1):
+                bomber[1][1] += 3
+            elif not Colisao(X+32-v_and2, bomber[1][2], 1):
+                bomber[1][1] -= 3
+            v_and2 -= 3
+            if v_and2 < 0:
+                v_and2 = 27
+        elif conseguiu[3]: #tentou andar
+            if not Colisao(X+32, Y+32+v_and2, 1):
+                bomber[1][2] += 3
+            elif not Colisao(X+32, Y+32-v_and2, 1):
+                bomber[1][2] -= 3
+            v_and2 -= 3
+            if v_and2 < 0:
+                v_and2 = 27
 
         #bombas:
         if key[pygame.K_x] and ok_press[0]:
