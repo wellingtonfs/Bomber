@@ -1,4 +1,4 @@
-import pygame, time
+import pygame, time, math
 from random import randint
 from threading import *
 
@@ -16,25 +16,79 @@ imgs.append(pygame.image.load('Recursos/qd1.png'))
 imgs.append(pygame.image.load('Recursos/qd2.png'))
 imgs.append(pygame.image.load('Recursos/qd3.png'))
 imgs.append(pygame.image.load('Recursos/qd4.png'))
+imgs.append(pygame.image.load('Recursos/bomba.png'))#4
 
 pontos_fixos = []
 matriz = []
 bomber = []
-bomber.append(pygame.image.load('Recursos/f_bomber.png'))
+monstros = []
+bombas = []
+bomber.append([pygame.image.load('Recursos/f_bomber.png'), 64, 64-26]) #26 = altura dele - 64: 90 - 64
+bomber.append([pygame.image.load('Recursos/f_bomber.png'), 1088, 576-26])
 
-#criar matriz de pontos:
-for i in range(11):
-    m = []
-    for j in range(21):
-        m.append([j*64, i*64])
-    matriz.append(m)
+def Dist(ponto1, ponto2):
+    return math.sqrt( (ponto1[0] - ponto2[0])**2 + (ponto1[1] - ponto2[1])**2 )
 
-for i in range(1, 20, 2):
-    for j in range(1, 10, 2):
-        pontos_fixos.append([j, i])
+def colisao(tipo, id):
+    global bomber, monstros
+    if tipo == 0:
+        pass
+    elif tipo == 1:
+        pass
+    return 0
+
+def Menu():
+    pass
+
+def Inicio_Listas():
+    global matriz, pontos_fixos
+    matriz = []
+    pontos_fixos = []
+    for i in range(11):
+        m = []
+        p = []
+        for j in range(21):
+            m.append([j*64, i*64])
+            p.append(0)
+        matriz.append(m)
+        pontos_fixos.append(p)
+
+    #Colocar blocos na volta do mapa
+    v = 0
+    for i in range(2):
+        for j in range(19):
+            pontos_fixos[v][j] = 1
+        v = len(pontos_fixos) - 1
+
+    v = 0
+    for i in range(2):
+        for j in range(len(pontos_fixos)):
+            pontos_fixos[j][v] = 1
+        v = len(pontos_fixos[0]) - 3
+
+    #Colocar os blocos fixos no mapa
+    for i in range(2, 10, 2):
+        for j in range(2, 18, 2):
+            pontos_fixos[i][j] = 1
+
+    #Colocar o resto dos blocos no mapa
+    for i in range(300):
+        x = randint(1,9)
+        y = randint(1,17)
+        tr = False
+        
+        if pontos_fixos[x][y] == 1 or pontos_fixos[x][y] == 2:
+            tr = True
+
+        if tr:
+            i -= 1
+        else:
+            pontos_fixos[x][y] = 0
 
 def Principal():
     loop = True
+    Inicio_Listas()
+    ok_press = [True, True]
     while loop:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -43,48 +97,84 @@ def Principal():
                 if event.key == pygame.K_q:
                     loop = False
 
-        ant = 0
+        key = pygame.key.get_pressed()
+
+        #movimento personagem 1:
+        if key[pygame.K_w]:
+            bomber[0][2] -= 3
+        if key[pygame.K_s]:
+            bomber[0][2] += 3
+        if key[pygame.K_a]:
+            bomber[0][1] -= 3
+        if key[pygame.K_d]:
+            bomber[0][1] += 3
+
+        #movimento personagem 2:
+        if key[pygame.K_UP]:
+            bomber[1][2] -= 3
+        if key[pygame.K_DOWN]:
+            bomber[1][2] += 3
+        if key[pygame.K_LEFT]:
+            bomber[1][1] -= 3
+        if key[pygame.K_RIGHT]:
+            bomber[1][1] += 3
+
+        #bombas:
+        if key[pygame.K_x] and ok_press[0]:
+            distance = [10000, -1, -1] #valor inicial qualquer(tem q ser grande para pegar todas as distancias)
+            for i in range(len(pontos_fixos)):
+                for j in range(len(pontos_fixos[0])):
+                    if pontos_fixos[i][j] == 0:
+                        ponto1 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
+                        ponto2 = [bomber[0][1]+32, bomber[0][2]+30]
+                        d = Dist(ponto1, ponto2)
+                        if d < distance[0]:
+                            distance[0] = d
+                            distance[1] = i
+                            distance[2] = j
+
+            bombas.append(matriz[distance[1]][distance[2]])
+            ok_press[0] = False
+        else:
+            if not key[pygame.K_x]:
+                ok_press[0] = True
+
+        if key[pygame.K_m] and ok_press[1]:
+            distance = [10000, -1, -1] #valor inicial qualquer(tem q ser grande para pegar todas as distancias)
+            for i in range(len(pontos_fixos)):
+                for j in range(len(pontos_fixos[0])):
+                    if pontos_fixos[i][j] == 0:
+                        ponto1 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
+                        ponto2 = [bomber[1][1]+32, bomber[1][2]+30] #32 e 30 é para a bomba ser colocada em relação ao pé do jogador
+                        d = Dist(ponto1, ponto2)
+                        if d < distance[0]:
+                            distance[0] = d
+                            distance[1] = i
+                            distance[2] = j
+
+            bombas.append(matriz[distance[1]][distance[2]])
+            ok_press[1] = False
+        else:
+            if not key[pygame.K_m]:
+                ok_press[1] = True
+
         for i in range(11):
-            if ant == 0:
-                m = 1
-            else:
-                m = 0
-            ant = m
             for j in range(21):
-                tela.blit(imgs[m], (j*64,i*64))
-                if m == 0:
-                    m = 1
-                else:
-                    m = 0
+                if pontos_fixos[i][j] == 0:
+                    tela.blit(imgs[0], matriz[i][j])
+                elif pontos_fixos[i][j] == 1:
+                    tela.blit(imgs[1], matriz[i][j])
+                elif pontos_fixos[i][j] == 2:
+                    tela.blit(imgs[2], matriz[i][j])
 
-        pontos = []
-        for i in range(100):
-            x = randint(0,10)
-            y = randint(0,20)
-            tr = False
-            for j in pontos:
-                if j[0] == x and j[1] == y:
-                    tr = True
-            
-            for j in pontos_fixos:
-                if j[0] == x and j[1] == y:
-                    tr = True
+        for bomba in bombas:
+            tela.blit(imgs[4], (bomba[0], bomba[1]))
 
-            if tr:
-                i -= 1
-            else:
-                pontos.append([x, y])
-
-        print(pontos_fixos)
-        for i in pontos_fixos:
-            tela.blit(imgs[3], matriz[i[0]][i[1]])
-
-        for i in pontos:
-            tela.blit(imgs[2], matriz[i[0]][i[1]])
+        for b in bomber:
+            tela.blit(b[0], (b[1], b[2]))
 
         pygame.display.update()
         relogio.tick(60)
-        time.sleep(2)
 
 Principal()
 
