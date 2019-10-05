@@ -6,7 +6,6 @@ pygame.init()
 
 #inicio da tela
 pygame.init()
-#relogio = pygame.time.Clock()
 pygame.display.set_caption("Bomber")
 tela = pygame.display.set_mode((1344,704)) #, pygame.FULLSCREEN)
 tela.fill((0,0,0))
@@ -17,6 +16,8 @@ imgs.append(pygame.image.load('Recursos/qd2.png'))
 imgs.append(pygame.image.load('Recursos/qd3.png'))
 imgs.append(pygame.image.load('Recursos/qd4.png'))
 imgs.append(pygame.image.load('Recursos/bomba.png'))#4
+
+fogo = pygame.image.load('Recursos/fogo.png')
 
 pontos_fixos = []
 matriz = []
@@ -37,6 +38,36 @@ def ordenar(vetor): #ordenado de maior pra menos
                 vetor[j] = vetor[i]
                 vetor[i] = aux
     return vetor
+
+def Central_Ponto(x, y):
+    global pontos_fixos, matriz
+    distance = [10000, -1, -1] #valor inicial qualquer(tem q ser grande para pegar todas as distancias)
+    for i in range(len(pontos_fixos)):
+        for j in range(len(pontos_fixos[0])):
+            if pontos_fixos[i][j] == 0:
+                ponto1 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
+                ponto2 = [x+32, y+32]
+                d = Dist(ponto1, ponto2)
+                if d < distance[0]:
+                    distance[0] = d
+                    distance[1] = i
+                    distance[2] = j
+    return [distance[1],distance[2]]
+
+def explosao(i, j):
+    global monstros, bomber
+    pt2 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
+    for m in range(len(monstros)):
+        pt = [monstros[m][1] + 32, monstros[m][2] + 32]
+        if Dist(pt, pt2) < 64:
+            return [0, m]
+    
+    for b in range(len(bomber)):
+        pt = [bomber[b][1] + 32, bomber[b][2] + 32]
+        if Dist(pt, pt2) < 64:
+            return [1, b]
+
+    return [-1]
 
 def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = monstro
     global pontos_fixos, matriz, bomber, monstros
@@ -62,11 +93,19 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
 
     if b == 0:
         pt = [bomber[1][1] + 32, bomber[1][2] + 32] #32 = metade da imagem do bomber
-    else:
+        if Dist(pt, [x, y]) < 64:
+            return 3
+    elif b == 1:
         pt = [bomber[0][1] + 32, bomber[0][2] + 32] #32 = metade da imagem do bomber
-    if Dist(pt, [x, y]) < 64:
-        return 3
-
+        if Dist(pt, [x, y]) < 64:
+            return 3
+    else:
+        pt = [bomber[1][1] + 32, bomber[1][2] + 32] #32 = metade da imagem do bomber
+        if Dist(pt, [x, y]) < 64:
+            return 3
+        pt = [bomber[0][1] + 32, bomber[0][2] + 32] #32 = metade da imagem do bomber
+        if Dist(pt, [x, y]) < 64:
+            return 3
     return 0
 
 def Menu():
@@ -119,7 +158,7 @@ def Inicio_Listas():
         if tr:
             i -= 1
         else:
-            pontos_fixos[x][y] = 0
+            pontos_fixos[x][y] = 2
     
     for bb in bomber:
         for i in range(len(pontos_fixos)):
@@ -137,7 +176,7 @@ def Principal(x=0):
     velocidades = [5, 3]
     qtd_bombas = [2, 1]
     pode_chutar = [False, False]
-    tamanho_fogo = [1, 1]
+    tamanho_fogo = [3, 1]
     escuto = [0, 0]
     while loop:
         for event in pygame.event.get():
@@ -220,19 +259,8 @@ def Principal(x=0):
         #bombas:
         if key[pygame.K_x] and ok_press[0]:
             if qtd_bombas[0] > 0:
-                distance = [10000, -1, -1] #valor inicial qualquer(tem q ser grande para pegar todas as distancias)
-                for i in range(len(pontos_fixos)):
-                    for j in range(len(pontos_fixos[0])):
-                        if pontos_fixos[i][j] == 0:
-                            ponto1 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
-                            ponto2 = [bomber[0][1]+32, bomber[0][2]+30]
-                            d = Dist(ponto1, ponto2)
-                            if d < distance[0]:
-                                distance[0] = d
-                                distance[1] = i
-                                distance[2] = j
-
-                bombas.append([matriz[distance[1]][distance[2]], time.time(), 0])
+                pt = Central_Ponto(bomber[0][1], bomber[0][2])
+                bombas.append([imgs[4], matriz[pt[0]][pt[1]], time.time(), 0, []])
                 qtd_bombas[0] -= 1
             ok_press[0] = False
         else:
@@ -241,19 +269,8 @@ def Principal(x=0):
 
         if key[pygame.K_m] and ok_press[1]:
             if qtd_bombas[1] > 0:
-                distance = [10000, -1, -1] #valor inicial qualquer(tem q ser grande para pegar todas as distancias)
-                for i in range(len(pontos_fixos)):
-                    for j in range(len(pontos_fixos[0])):
-                        if pontos_fixos[i][j] == 0:
-                            ponto1 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
-                            ponto2 = [bomber[1][1]+32, bomber[1][2]+30] #32 e 30 é para a bomba ser colocada em relação ao pé do jogador
-                            d = Dist(ponto1, ponto2)
-                            if d < distance[0]:
-                                distance[0] = d
-                                distance[1] = i
-                                distance[2] = j
-
-                bombas.append([matriz[distance[1]][distance[2]], time.time(), 1])
+                pt = Central_Ponto(bomber[1][1], bomber[1][2])
+                bombas.append([imgs[4], matriz[pt[0]][pt[1]], time.time(), 1, []])
                 qtd_bombas[1] -= 1
             ok_press[1] = False
         else:
@@ -269,16 +286,50 @@ def Principal(x=0):
                 elif pontos_fixos[i][j] == 2:
                     tela.blit(imgs[2], matriz[i][j])
 
+        #mostrar as bombas e fazer o processamento da explosão
         apagar = []
         for b in range(len(bombas)):
-            tela.blit(imgs[4], (bombas[b][0][0], bombas[b][0][1]))
-            if (time.time() - bombas[b][1]) > 3:
+            tela.blit(bombas[b][0], (bombas[b][1][0], bombas[b][1][1]))
+            if len(bombas[b][4]) > 0:
+                for i in bombas[b][4]:
+                    tela.blit(fogo, matriz[i[0]][i[1]])
+            if 3 < (time.time() - bombas[b][2]) < 3.5:
+                lc = Central_Ponto(bombas[b][1][0], bombas[b][1][1])
+                bombas[b][1] = matriz[lc[0]][lc[1]]
+                contador = 0
+                while contador <= 3:
+                    for i in range(1, (tamanho_fogo[0]+1)):
+                        try:
+                            if contador == 0:
+                                if pontos_fixos[lc[0]][lc[1]+i] == 2 or pontos_fixos[lc[0]][lc[1]+i] == 0:
+                                    pontos_fixos[lc[0]][lc[1]+i] = 0
+                                    bombas[b][4].append([lc[0],lc[1]+i])
+                            if contador == 1:
+                                if pontos_fixos[lc[0]][lc[1]-i] == 2 or pontos_fixos[lc[0]][lc[1]-i] == 0:
+                                    if (lc[1]-i) >= 0:
+                                        pontos_fixos[lc[0]][lc[1]-i] = 0
+                                        bombas[b][4].append([lc[0],lc[1]-i])
+                            if contador == 2:
+                                if pontos_fixos[lc[0]+i][lc[1]] == 2 or pontos_fixos[lc[0]+i][lc[1]] == 0:
+                                    pontos_fixos[lc[0]+i][lc[1]] = 0
+                                    bombas[b][4].append([lc[0]+i,lc[1]])
+                            if contador == 3:
+                                if pontos_fixos[lc[0]-i][lc[1]] == 2 or pontos_fixos[lc[0]-i][lc[1]] == 0:
+                                    if (lc[0]-i) >= 0:
+                                        pontos_fixos[lc[0]-i][lc[1]] = 0
+                                        bombas[b][4].append([lc[0]-i,lc[1]])
+                        except Exception as e:
+                            print(e)
+                            
+                    contador += 1
+                bombas[b][0] = fogo
+            elif (time.time() - bombas[b][2]) > 3.5:
                 apagar.append(b)
-
+            
         apagar = ordenar(apagar)
 
         for i in apagar:
-            if bombas[i][2] == 0:
+            if bombas[i][3] == 0:
                 qtd_bombas[0] += 1
             else:
                 qtd_bombas[1] += 1
@@ -288,7 +339,6 @@ def Principal(x=0):
             tela.blit(imgs[3], (b[1], b[2]))
 
         pygame.display.update()
-        #relogio.tick(60)
     return -1
 
 qt = True
