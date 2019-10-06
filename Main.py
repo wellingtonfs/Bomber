@@ -17,6 +17,14 @@ imgs.append(pygame.image.load('Recursos/qd3.png'))
 imgs.append(pygame.image.load('Recursos/qd4.png'))
 imgs.append(pygame.image.load('Recursos/bomba.png'))#4
 
+itens = [
+    pygame.image.load('Recursos/+bomba.png'),
+    pygame.image.load('Recursos/fire.png'),
+    pygame.image.load('Recursos/escudo.png'),
+    pygame.image.load('Recursos/chute.png'),
+    pygame.image.load('Recursos/bota.png')
+]
+
 fogo = pygame.image.load('Recursos/fogo.png')
 
 pontos_fixos = []
@@ -44,7 +52,7 @@ def Central_Ponto(x, y):
     distance = [10000, -1, -1] #valor inicial qualquer(tem q ser grande para pegar todas as distancias)
     for i in range(len(pontos_fixos)):
         for j in range(len(pontos_fixos[0])):
-            if pontos_fixos[i][j] == 0:
+            if pontos_fixos[i][j][0] == 0:
                 ponto1 = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
                 ponto2 = [x+32, y+32]
                 d = Dist(ponto1, ponto2)
@@ -76,17 +84,17 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
     for m in monstros:
         pt = [m[1] + 32, m[2] + 32] #32 = metade da imagem do monstro
         if Dist(pt, [x, y]) < 64:
-            return 4
+            return 5
 
     pts_lados = [[x-28,y-28], [x+28,y-28], [x+28,y+28], [x-28,y+28]]
     for p in pts_lados:
         for i in range(len(pontos_fixos)):
             for j in range(len(pontos_fixos[0])):
-                if pontos_fixos[i][j] == 1:
+                if pontos_fixos[i][j][0] == 1:
                     if matriz[i][j][0] < p[0] < (matriz[i][j][0] + 64):
                         if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
                             return 1
-                elif pontos_fixos[i][j] == 2:
+                elif pontos_fixos[i][j][0] == 2:
                     if matriz[i][j][0] < p[0] < (matriz[i][j][0] + 64):
                         if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
                             return 2
@@ -94,7 +102,7 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
     if b == 0:
         pt = [bomber[1][1] + 32, bomber[1][2] + 32] #32 = metade da imagem do bomber
         if Dist(pt, [x, y]) < 64:
-            return 3
+            return 4
     elif b == 1:
         pt = [bomber[0][1] + 32, bomber[0][2] + 32] #32 = metade da imagem do bomber
         if Dist(pt, [x, y]) < 64:
@@ -102,7 +110,7 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
     else:
         pt = [bomber[1][1] + 32, bomber[1][2] + 32] #32 = metade da imagem do bomber
         if Dist(pt, [x, y]) < 64:
-            return 3
+            return 4
         pt = [bomber[0][1] + 32, bomber[0][2] + 32] #32 = metade da imagem do bomber
         if Dist(pt, [x, y]) < 64:
             return 3
@@ -124,7 +132,7 @@ def Inicio_Listas():
         p = []
         for j in range(21):
             m.append([j*64, i*64])
-            p.append(0)
+            p.append([0])
         matriz.append(m)
         pontos_fixos.append(p)
 
@@ -132,40 +140,45 @@ def Inicio_Listas():
     v = 0
     for i in range(2):
         for j in range(19):
-            pontos_fixos[v][j] = 1
+            pontos_fixos[v][j] = [1]
         v = len(pontos_fixos) - 1
 
     v = 0
     for i in range(2):
         for j in range(len(pontos_fixos)):
-            pontos_fixos[j][v] = 1
+            pontos_fixos[j][v] = [1]
         v = len(pontos_fixos[0]) - 3
 
     #Colocar os blocos fixos no mapa
     for i in range(2, 10, 2):
         for j in range(2, 18, 2):
-            pontos_fixos[i][j] = 1
+            pontos_fixos[i][j] = [1]
 
     #Colocar o resto dos blocos no mapa
+    contador = 0
     for i in range(300):
         x = randint(1,9)
         y = randint(1,17)
         tr = False
         
-        if pontos_fixos[x][y] == 1 or pontos_fixos[x][y] == 2:
+        if pontos_fixos[x][y][0] == 1 or pontos_fixos[x][y][0] == 2:
             tr = True
 
         if tr:
             i -= 1
         else:
-            pontos_fixos[x][y] = 2
+            if contador < 10:
+                pontos_fixos[x][y] = [2, randint(3, 7)]
+                contador += 1
+            else:
+                pontos_fixos[x][y] = [2, -1]
     
     for bb in bomber:
         for i in range(len(pontos_fixos)):
             for j in range(len(pontos_fixos[0])):
                 if Dist([bb[1], bb[2]], matriz[i][j]) < 100:
-                    if pontos_fixos[i][j] == 2:
-                        pontos_fixos[i][j] = 0
+                    if pontos_fixos[i][j][0] == 2:
+                        pontos_fixos[i][j] = [0]
 
 def Principal(x=0):
     loop = True
@@ -173,10 +186,10 @@ def Principal(x=0):
     ok_press = [True, True]
     v_and, v_and2 = 27, 27
     #propriedade dos jogadores
-    velocidades = [5, 3]
+    velocidades = [3, 3]
     qtd_bombas = [2, 1]
     pode_chutar = [False, False]
-    tamanho_fogo = [3, 1]
+    tamanho_fogo = [1, 1]
     escuto = [0, 0]
     while loop:
         for event in pygame.event.get():
@@ -279,12 +292,14 @@ def Principal(x=0):
 
         for i in range(11):
             for j in range(21):
-                if pontos_fixos[i][j] == 0:
+                if pontos_fixos[i][j][0] == 0:
                     tela.blit(imgs[0], matriz[i][j])
-                elif pontos_fixos[i][j] == 1:
+                elif pontos_fixos[i][j][0] == 1:
                     tela.blit(imgs[1], matriz[i][j])
-                elif pontos_fixos[i][j] == 2:
+                elif pontos_fixos[i][j][0] == 2:
                     tela.blit(imgs[2], matriz[i][j])
+                else:
+                    tela.blit(itens[pontos_fixos[i][j][0]-3], matriz[i][j])
 
         #mostrar as bombas e fazer o processamento da explosão
         apagar = []
@@ -297,26 +312,72 @@ def Principal(x=0):
                 lc = Central_Ponto(bombas[b][1][0], bombas[b][1][1])
                 bombas[b][1] = matriz[lc[0]][lc[1]]
                 contador = 0
+                a = Colisao(matriz[lc[0]][lc[1]][0] + 32, matriz[lc[0]][lc[1]][1] + 32, 3)
+                if a == 3:
+                    print("morreu o primeiro")
+                elif a == 4:
+                    print("morreu o segundo")
                 while contador <= 3:
                     for i in range(1, (tamanho_fogo[0]+1)):
                         try:
                             if contador == 0:
-                                if pontos_fixos[lc[0]][lc[1]+i] == 2 or pontos_fixos[lc[0]][lc[1]+i] == 0:
-                                    pontos_fixos[lc[0]][lc[1]+i] = 0
+                                a = Colisao(matriz[lc[0]][lc[1]+i][0] + 32, matriz[lc[0]][lc[1]+i][1] + 32, 3)
+                                if a == 3:
+                                    print("morreu o primeiro")
+                                elif a == 4:
+                                    print("morreu o segundo")
+                                if pontos_fixos[lc[0]][lc[1]+i][0] != 1:
+                                    if pontos_fixos[lc[0]][lc[1]+i][0] == 2:
+                                        if pontos_fixos[lc[0]][lc[1]+i][1] != -1:
+                                            pontos_fixos[lc[0]][lc[1]+i][0] = pontos_fixos[lc[0]][lc[1]+i][1]
+                                            bombas[b][4].append([lc[0],lc[1]+i])
+                                            continue
+                                    pontos_fixos[lc[0]][lc[1]+i] = [0]
                                     bombas[b][4].append([lc[0],lc[1]+i])
                             if contador == 1:
-                                if pontos_fixos[lc[0]][lc[1]-i] == 2 or pontos_fixos[lc[0]][lc[1]-i] == 0:
-                                    if (lc[1]-i) >= 0:
-                                        pontos_fixos[lc[0]][lc[1]-i] = 0
+                                if (lc[1]-i) >= 0:
+                                    a = Colisao(matriz[lc[0]][lc[1]-i][0] + 32, matriz[lc[0]][lc[1]-i][1] + 32, 3)
+                                    if a == 3:
+                                        print("morreu o primeiro")
+                                    elif a == 4:
+                                        print("morreu o segundo")
+                                    if pontos_fixos[lc[0]][lc[1]-i][0] != 1:
+                                        if pontos_fixos[lc[0]][lc[1]-i][0] == 2:
+                                            if pontos_fixos[lc[0]][lc[1]-i][1] != -1:
+                                                pontos_fixos[lc[0]][lc[1]-i][0] = pontos_fixos[lc[0]][lc[1]-i][1]
+                                                bombas[b][4].append([lc[0],lc[1]-i])
+                                                continue
+                                        pontos_fixos[lc[0]][lc[1]-i] = [0]
                                         bombas[b][4].append([lc[0],lc[1]-i])
+                                        
                             if contador == 2:
-                                if pontos_fixos[lc[0]+i][lc[1]] == 2 or pontos_fixos[lc[0]+i][lc[1]] == 0:
-                                    pontos_fixos[lc[0]+i][lc[1]] = 0
+                                a = Colisao(matriz[lc[0]+i][lc[1]][0] + 32, matriz[lc[0]+i][lc[1]][1] + 32, 3)
+                                if a == 3:
+                                    print("morreu o primeiro")
+                                elif a == 4:
+                                    print("morreu o segundo")
+                                if pontos_fixos[lc[0]+i][lc[1]][0] != 1:
+                                    if pontos_fixos[lc[0]+i][lc[1]][0] == 2:
+                                        if pontos_fixos[lc[0]+i][lc[1]][1] != -1:
+                                            pontos_fixos[lc[0]+i][lc[1]][0] = pontos_fixos[lc[0]+i][lc[1]][1]
+                                            bombas[b][4].append([lc[0]+i,lc[1]])
+                                            continue
+                                    pontos_fixos[lc[0]+i][lc[1]] = [0]
                                     bombas[b][4].append([lc[0]+i,lc[1]])
                             if contador == 3:
-                                if pontos_fixos[lc[0]-i][lc[1]] == 2 or pontos_fixos[lc[0]-i][lc[1]] == 0:
-                                    if (lc[0]-i) >= 0:
-                                        pontos_fixos[lc[0]-i][lc[1]] = 0
+                                if (lc[0]-i) >= 0:
+                                    a = Colisao(matriz[lc[0]-i][lc[1]][0] + 32, matriz[lc[0]-i][lc[1]][1] + 32, 3)
+                                    if a == 3:
+                                        print("morreu o primeiro")
+                                    elif a == 4:
+                                        print("morreu o segundo")
+                                    if pontos_fixos[lc[0]-i][lc[1]][0] != 1:
+                                        if pontos_fixos[lc[0]-i][lc[1]][0] == 2:
+                                            if pontos_fixos[lc[0]-i][lc[1]][1] != -1:
+                                                pontos_fixos[lc[0]-i][lc[1]][0] = pontos_fixos[lc[0]-i][lc[1]][1]
+                                                bombas[b][4].append([lc[0]-i,lc[1]])
+                                                continue
+                                        pontos_fixos[lc[0]-i][lc[1]] = [0]
                                         bombas[b][4].append([lc[0]-i,lc[1]])
                         except Exception as e:
                             print(e)
