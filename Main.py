@@ -51,17 +51,33 @@ miniaturas = [
 ]
 
 cleo = [
-    pygame.image.load('Recursos/cleo1.png'),
-    pygame.image.load('Recursos/cleo2.png'),
-    pygame.image.load('Recursos/cleo3.png'),
-    pygame.image.load('Recursos/cleo4.png')
+    pygame.image.load('Recursos/Personagens/cleo1.png'),
+    pygame.image.load('Recursos/Personagens/cleo2.png'),
+    pygame.image.load('Recursos/Personagens/cleo3.png'),
+    pygame.image.load('Recursos/Personagens/cleo4.png'),
+    pygame.image.load('Recursos/Personagens/cleo1_1.png'),#4
+    pygame.image.load('Recursos/Personagens/cleo1_2.png'),
+    pygame.image.load('Recursos/Personagens/cleo2_1.png'),
+    pygame.image.load('Recursos/Personagens/cleo2_2.png'),
+    pygame.image.load('Recursos/Personagens/cleo3_1.png'),
+    pygame.image.load('Recursos/Personagens/cleo3_2.png'),
+    pygame.image.load('Recursos/Personagens/cleo4_1.png'),
+    pygame.image.load('Recursos/Personagens/cleo4_2.png')
 ]
 
 penna = [
-    pygame.image.load('Recursos/penna1.png'),
-    pygame.image.load('Recursos/penna2.png'),
-    pygame.image.load('Recursos/penna3.png'),
-    pygame.image.load('Recursos/penna4.png')
+    pygame.image.load('Recursos/Personagens/penna1.png'),
+    pygame.image.load('Recursos/Personagens/penna2.png'),
+    pygame.image.load('Recursos/Personagens/penna3.png'),
+    pygame.image.load('Recursos/Personagens/penna4.png'),
+    pygame.image.load('Recursos/Personagens/penna1_1.png'),#4
+    pygame.image.load('Recursos/Personagens/penna1_2.png'),
+    pygame.image.load('Recursos/Personagens/penna2_1.png'),
+    pygame.image.load('Recursos/Personagens/penna2_2.png'),
+    pygame.image.load('Recursos/Personagens/penna3_1.png'),
+    pygame.image.load('Recursos/Personagens/penna3_2.png'),
+    pygame.image.load('Recursos/Personagens/penna4_1.png'),
+    pygame.image.load('Recursos/Personagens/penna4_2.png')
 ]
 
 fogo = pygame.image.load('Recursos/fogo.png')
@@ -211,6 +227,14 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
             if Dist(ptt, [x,y]) <= 20:
                 continue
             if Dist([x, y], ptt) < Dist([bomber[b][1]+32, bomber[b][2]+32], ptt):
+                return 11
+    else:
+        for bb in range(len(bombas)):
+            ptt = [bombas[bb][1][0] + 32, bombas[bb][1][1] + 32]
+            if Dist(ptt, [x,y]) < 30:
+                continue
+            elif Dist(ptt, [x,y]) < 64:
+                bombas[bb][6] = bombas[int(b-3)][6]
                 return 11
 
     if b == 0:
@@ -375,6 +399,7 @@ def Principal():
     Inicio_Listas()
     ok_press = [True, True]
     v_and, v_and2 = 27, 27
+    tempo_imagens = [0, 0]
     #reset nas variaveis
     velocidades = [3, 3]
     qtd_bombas = [1, 1]
@@ -409,11 +434,25 @@ def Principal():
         if key[pygame.K_w]:
             Y -= velocidades[0]
             conseguiu[2] = True
-            bomber[0][0] = 1
+            if (time.time() - tempo_imagens[0]) > 0.25:
+                if bomber[0][0] == 6:
+                    bomber[0][0] = 7
+                elif bomber[0][0] == 7:
+                    bomber[0][0] = 6
+                else:
+                    bomber[0][0] = 6
+                tempo_imagens[0] = time.time()
         elif key[pygame.K_s]:
             Y += velocidades[0]
             conseguiu[2] = True
-            bomber[0][0] = 0
+            if (time.time() - tempo_imagens[0]) > 0.25:
+                if bomber[0][0] == 4:
+                    bomber[0][0] = 5
+                elif bomber[0][0] == 5:
+                    bomber[0][0] = 4
+                else:
+                    bomber[0][0] = 4
+                tempo_imagens[0] = time.time()
         col = Colisao(X+32, Y+32, 0)
         if col == 0 and conseguiu[2]:
             conseguiu[0] = True
@@ -432,11 +471,36 @@ def Principal():
         if key[pygame.K_a]:
             X -= velocidades[0]
             conseguiu[3] = True
-            bomber[0][0] = 3
+            if (time.time() - tempo_imagens[0]) > 0.25:
+                if bomber[0][0] == 10:
+                    bomber[0][0] = 11
+                elif bomber[0][0] == 11:
+                    bomber[0][0] = 10
+                else:
+                    bomber[0][0] = 10
+                tempo_imagens[0] = time.time()
         elif key[pygame.K_d]:
             X += velocidades[0]
             conseguiu[3] = True
-            bomber[0][0] = 2
+            if (time.time() - tempo_imagens[0]) > 0.25:
+                if bomber[0][0] == 8:
+                    bomber[0][0] = 9
+                elif bomber[0][0] == 9:
+                    bomber[0][0] = 8
+                else:
+                    bomber[0][0] = 8
+                tempo_imagens[0] = time.time()
+
+        if not conseguiu[2] and not conseguiu[3]:
+            if bomber[0][0] > 3:
+                if bomber[0][0] == 4 or bomber[0][0] == 5:
+                    bomber[0][0] = 0
+                elif bomber[0][0] == 6 or bomber[0][0] == 7:
+                    bomber[0][0] = 1
+                elif bomber[0][0] == 8 or bomber[0][0] == 9:
+                    bomber[0][0] = 2
+                else:
+                    bomber[0][0] = 3
 
         col = Colisao(X+32, bomber[0][2]+32, 0)
         if col == 0 and conseguiu[3]:
@@ -492,11 +556,25 @@ def Principal():
         if key[pygame.K_UP]:
             Y -= velocidades[1]
             conseguiu[2] = True
-            bomber[1][0] = 1
+            if (time.time() - tempo_imagens[1]) > 0.25:
+                if bomber[1][0] == 6:
+                    bomber[1][0] = 7
+                elif bomber[1][0] == 7:
+                    bomber[1][0] = 6
+                else:
+                    bomber[1][0] = 6
+                tempo_imagens[1] = time.time()
         elif key[pygame.K_DOWN]:
             Y += velocidades[1]
             conseguiu[2] = True
-            bomber[1][0] = 0
+            if (time.time() - tempo_imagens[1]) > 0.25:
+                if bomber[1][0] == 4:
+                    bomber[1][0] = 5
+                elif bomber[1][0] == 5:
+                    bomber[1][0] = 4
+                else:
+                    bomber[1][0] = 4
+                tempo_imagens[1] = time.time()
         col = Colisao(X+32, Y+32, 1)
         if col == 0 and conseguiu[2]:
             conseguiu[0] = True
@@ -515,11 +593,36 @@ def Principal():
         if key[pygame.K_LEFT]:
             X -= velocidades[1]
             conseguiu[3] = True
-            bomber[1][0] = 3
+            if (time.time() - tempo_imagens[1]) > 0.25:
+                if bomber[1][0] == 10:
+                    bomber[1][0] = 11
+                elif bomber[1][0] == 11:
+                    bomber[1][0] = 10
+                else:
+                    bomber[1][0] = 10
+                tempo_imagens[1] = time.time()
         elif key[pygame.K_RIGHT]:
             X += velocidades[1]
             conseguiu[3] = True
-            bomber[1][0] = 2
+            if (time.time() - tempo_imagens[1]) > 0.25:
+                if bomber[1][0] == 8:
+                    bomber[1][0] = 9
+                elif bomber[1][0] == 9:
+                    bomber[1][0] = 8
+                else:
+                    bomber[1][0] = 8
+                tempo_imagens[1] = time.time()
+
+        if not conseguiu[2] and not conseguiu[3]:
+            if bomber[1][0] > 3:
+                if bomber[1][0] == 4 or bomber[1][0] == 5:
+                    bomber[1][0] = 0
+                elif bomber[1][0] == 6 or bomber[1][0] == 7:
+                    bomber[1][0] = 1
+                elif bomber[1][0] == 8 or bomber[1][0] == 9:
+                    bomber[1][0] = 2
+                else:
+                    bomber[1][0] = 3
 
         col = Colisao(X+32, bomber[1][2]+32, 1)
         if col == 0 and conseguiu[3]:
@@ -616,7 +719,7 @@ def Principal():
                     py += 10
                 elif bombas[b][6] == 4:
                     py -= 10
-                if Colisao(px+32, py+32, 3) == 0:
+                if Colisao(px+32, py+32, b+3) == 0:
                     bombas[b][1] = [px, py]
                 else:
                     bombas[b][6] = 0
@@ -646,8 +749,12 @@ def Principal():
                     else:
                         return 1
                     nao_morreu[1] = False
+                if bombas[b][3] == 0:
+                    tmf = tamanho_fogo[0]
+                else:
+                    tmf = tamanho_fogo[1]
                 while contador <= 3:
-                    for i in range(1, (tamanho_fogo[0]+1)):
+                    for i in range(1, (tmf+1)):
                         try:
                             if contador == 0:
                                 c = explosao(lc[0], lc[1]+i, b) 
@@ -669,13 +776,18 @@ def Principal():
                                     nao_morreu[1] = False
                                     break
                                 if pontos_fixos[lc[0]][lc[1]+i][0] != 1:
+                                    quitar = False
                                     if pontos_fixos[lc[0]][lc[1]+i][0] == 2:
                                         if pontos_fixos[lc[0]][lc[1]+i][1] != -1:
                                             pontos_fixos[lc[0]][lc[1]+i][0] = pontos_fixos[lc[0]][lc[1]+i][1]
                                             bombas[b][5].append([lc[0],lc[1]+i])
-                                            continue
+                                            break
+                                        else:
+                                            quitar = True
                                     pontos_fixos[lc[0]][lc[1]+i] = [0]
                                     bombas[b][5].append([lc[0],lc[1]+i])
+                                    if quitar:
+                                        break
                                 else:
                                     break
                             if contador == 1:
@@ -699,13 +811,18 @@ def Principal():
                                         nao_morreu[1] = False
                                         break
                                     if pontos_fixos[lc[0]][lc[1]-i][0] != 1:
+                                        quitar = False
                                         if pontos_fixos[lc[0]][lc[1]-i][0] == 2:
                                             if pontos_fixos[lc[0]][lc[1]-i][1] != -1:
                                                 pontos_fixos[lc[0]][lc[1]-i][0] = pontos_fixos[lc[0]][lc[1]-i][1]
                                                 bombas[b][5].append([lc[0],lc[1]-i])
-                                                continue
+                                                break
+                                            else:
+                                                quitar = True
                                         pontos_fixos[lc[0]][lc[1]-i] = [0]
                                         bombas[b][5].append([lc[0],lc[1]-i])
+                                        if quitar:
+                                            break
                                     else:
                                         break
                                         
@@ -729,13 +846,18 @@ def Principal():
                                     nao_morreu[1] = False
                                     break
                                 if pontos_fixos[lc[0]+i][lc[1]][0] != 1:
+                                    quitar = False
                                     if pontos_fixos[lc[0]+i][lc[1]][0] == 2:
                                         if pontos_fixos[lc[0]+i][lc[1]][1] != -1:
                                             pontos_fixos[lc[0]+i][lc[1]][0] = pontos_fixos[lc[0]+i][lc[1]][1]
                                             bombas[b][5].append([lc[0]+i,lc[1]])
-                                            continue
+                                            break
+                                        else:
+                                            quitar = True
                                     pontos_fixos[lc[0]+i][lc[1]] = [0]
                                     bombas[b][5].append([lc[0]+i,lc[1]])
+                                    if quitar:
+                                        break
                                 else:
                                     break
                             if contador == 3:
@@ -759,13 +881,18 @@ def Principal():
                                         nao_morreu[1] = False
                                         break
                                     if pontos_fixos[lc[0]-i][lc[1]][0] != 1:
+                                        quitar = False
                                         if pontos_fixos[lc[0]-i][lc[1]][0] == 2:
                                             if pontos_fixos[lc[0]-i][lc[1]][1] != -1:
                                                 pontos_fixos[lc[0]-i][lc[1]][0] = pontos_fixos[lc[0]-i][lc[1]][1]
                                                 bombas[b][5].append([lc[0]-i,lc[1]])
-                                                continue
+                                                break
+                                            else:
+                                                quitar = True
                                         pontos_fixos[lc[0]-i][lc[1]] = [0]
                                         bombas[b][5].append([lc[0]-i,lc[1]])
+                                        if quitar:
+                                            break
                                     else:
                                         break
                         except Exception as e:
@@ -784,8 +911,12 @@ def Principal():
         for i in apagar:
             del(bombas[i])
 
-        tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-19))
-        tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-19))
+        if bomber[0][2] > bomber[1][2]:
+            tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-19))
+            tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-19))
+        else:
+            tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-19))
+            tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-19))
 
         mostrar_msgs()
         pygame.display.update()
@@ -796,7 +927,6 @@ while qt:
     placar = [0, 0]
     qt2 = True
     m = Menu()
-    pygame.mixer.music.stop()
     if m == 1:
         break
     while qt2:
