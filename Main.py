@@ -624,7 +624,7 @@ def Principal():
             if len(bombas[b][5]) > 0:
                 for i in bombas[b][5]:
                     tela.blit(fogo, matriz[i[0]][i[1]])
-            if (time.time() - bombas[b][2]) > 2 and bombas[b][4] == 0:
+            if (time.time() - bombas[b][2]) > 2.5 and bombas[b][4] == 0:
                 bombas[b][6] = 0
                 lc = Central_Ponto(bombas[b][1][0], bombas[b][1][1])
                 bombas[b][1] = matriz[lc[0]][lc[1]]
