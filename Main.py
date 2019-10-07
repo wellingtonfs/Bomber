@@ -19,7 +19,6 @@ imgs = []
 imgs.append(pygame.image.load('Recursos/fundo.png'))
 imgs.append(pygame.image.load('Recursos/qd2.png'))
 imgs.append(pygame.image.load('Recursos/qd3.png'))
-imgs.append(pygame.image.load('Recursos/qd4.png'))
 imgs.append(pygame.image.load('Recursos/bomba.png'))#4
 
 itens = [
@@ -676,7 +675,7 @@ def Principal():
         if key[pygame.K_c] and ok_press[0]:
             if qtd_bombas[0] > 0:
                 pt = Central_Ponto(bomber[0][1], bomber[0][2])
-                bombas.append([imgs[4], matriz[pt[0]][pt[1]], time.time(), 0, 0, [], 0])
+                bombas.append([imgs[3], matriz[pt[0]][pt[1]], time.time(), 0, 0, [], 0])
                 qtd_bombas[0] -= 1
                 sair_bomba[0] = False
             ok_press[0] = False
@@ -687,7 +686,7 @@ def Principal():
         if key[pygame.K_m] and ok_press[1]:
             if qtd_bombas[1] > 0:
                 pt = Central_Ponto(bomber[1][1], bomber[1][2])
-                bombas.append([imgs[4], matriz[pt[0]][pt[1]], time.time(), 1, 0, [], 0])
+                bombas.append([imgs[2], matriz[pt[0]][pt[1]], time.time(), 1, 0, [], 0])
                 qtd_bombas[1] -= 1
                 sair_bomba[1] = False
             ok_press[1] = False
