@@ -369,7 +369,7 @@ def Inicio_Listas():
 
     #Colocar o resto dos blocos no mapa
     contador = 0
-    for i in range(30):
+    for i in range(50):
         x = randint(1,9)
         y = randint(1,17)
         tr = False
@@ -380,7 +380,7 @@ def Inicio_Listas():
         if tr:
             i -= 1
         else:
-            if contador < 10:
+            if contador < 15:
                 pontos_fixos[x][y] = [2, randint(3, 7)]
                 contador += 1
             else:
