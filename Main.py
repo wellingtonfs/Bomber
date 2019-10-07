@@ -10,6 +10,12 @@ pygame.display.set_caption("Bomber")
 tela = pygame.display.set_mode((1344,704)) #, pygame.FULLSCREEN)
 tela.fill((0,0,0))
 
+#fontes para mostrar mensagens
+pygame.font.init()
+fonte_padrao = pygame.font.get_default_font()
+fonte_txt = pygame.font.SysFont(fonte_padrao, 30)
+fonte_txt2 = pygame.font.SysFont(fonte_padrao, 10)
+
 imgs = []
 imgs.append(pygame.image.load('Recursos/fundo.png'))
 imgs.append(pygame.image.load('Recursos/qd2.png'))
@@ -25,6 +31,40 @@ itens = [
     pygame.image.load('Recursos/bota.png')
 ]
 
+imgs_menu = [
+    pygame.image.load('Recursos/fundo_menu.png'),
+    pygame.image.load('Recursos/btn1.png'),
+    pygame.image.load('Recursos/btn2.png'),
+    pygame.image.load('Recursos/instrucoes.png')
+]
+
+vencedor = [
+    pygame.image.load('Recursos/ply1.png'),
+    pygame.image.load('Recursos/ply2.png')
+]
+
+miniaturas = [
+    pygame.image.load('Recursos/mbomba.png'),
+    pygame.image.load('Recursos/mfogo.png'),
+    pygame.image.load('Recursos/mescudo.png'),
+    pygame.image.load('Recursos/mchute.png'),
+    pygame.image.load('Recursos/mbota.png')
+]
+
+cleo = [
+    pygame.image.load('Recursos/cleo1.png'),
+    pygame.image.load('Recursos/cleo2.png'),
+    pygame.image.load('Recursos/cleo3.png'),
+    pygame.image.load('Recursos/cleo4.png')
+]
+
+penna = [
+    pygame.image.load('Recursos/penna1.png'),
+    pygame.image.load('Recursos/penna2.png'),
+    pygame.image.load('Recursos/penna3.png'),
+    pygame.image.load('Recursos/penna4.png')
+]
+
 fogo = pygame.image.load('Recursos/fogo.png')
 
 pontos_fixos = []
@@ -32,8 +72,8 @@ matriz = []
 bomber = []
 monstros = []
 bombas = []
-bomber.append([pygame.image.load('Recursos/cleo1.png'), 64, 64])
-bomber.append([pygame.image.load('Recursos/cleo1.png'), 1088, 576])
+bomber.append([0, 64, 64])
+bomber.append([0, 1088, 576])
 
 #propriedade dos jogadores
 velocidades = [3, 3]
@@ -41,6 +81,52 @@ qtd_bombas = [1, 1]
 pode_chutar = [False, False]
 tamanho_fogo = [1, 1]
 escudo = [0, 0]
+
+placar = [0, 0]
+
+def mostrar_msgs():
+    global tela, fonte_txt, placar, miniaturas, fonte_txt2
+    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo
+
+    textoEsct = fonte_txt.render("Placar", 1, (255,255,255))
+    tela.blit(textoEsct, (1250, 70))
+    msg = "%d  :  %d" %(placar[0], placar[1])
+    textoEsct = fonte_txt.render(msg, 1, (255,255,255))
+    tela.blit(textoEsct, (1255, 100))
+
+    infos = [qtd_bombas[0], tamanho_fogo[0], escudo[0], pode_chutar[0], velocidades[0]]
+
+    for i in range(5):
+        if i == 3:
+            if pode_chutar[0]:
+                msg = "1"
+            else:
+                msg = "0"
+        elif i == 4:
+            msg = "%.1f" %infos[i]
+        else:
+            msg = "%d" %infos[i]
+
+        tela.blit(miniaturas[i], (1230, 200+(30*i)))
+        textoEsct = fonte_txt.render(msg, 1, (255,255,255))
+        tela.blit(textoEsct, (1255, 200+(30*i)))
+
+    infos = [qtd_bombas[1], tamanho_fogo[1], escudo[1], pode_chutar[1], velocidades[1]]
+
+    for i in range(5):
+        if i == 3:
+            if pode_chutar[1]:
+                msg = "1"
+            else:
+                msg = "0"
+        elif i == 4:
+            msg = "%.1f" %infos[i]
+        else:
+            msg = "%d" %infos[i]
+
+        tela.blit(miniaturas[i], (1230, 400+(30*i)))
+        textoEsct = fonte_txt.render(msg, 1, (255,255,255))
+        tela.blit(textoEsct, (1255, 400+(30*i)))
 
 def Dist(ponto1, ponto2):
     return math.sqrt( (ponto1[0] - ponto2[0])**2 + (ponto1[1] - ponto2[1])**2 )
@@ -130,15 +216,15 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
 
     if b == 0:
         pt = [bomber[1][1] + 28, bomber[1][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 64:
+        if Dist(pt, [x, y]) < 56:
             return 9
     elif b == 1:
         pt = [bomber[0][1] + 28, bomber[0][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 64:
+        if Dist(pt, [x, y]) < 56:
             return 8
     else:
         pt = [bomber[1][1] + 28, bomber[1][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 64:
+        if Dist(pt, [x, y]) < 56:
             return 9
         pt = [bomber[0][1] + 28, bomber[0][2] + 28] #28 = metade da imagem do bomber
         if Dist(pt, [x, y]) < 56:
@@ -161,7 +247,7 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
                         if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
                             val = pontos_fixos[i][j][0]
                             #colocar os buffs nos bombers
-                            if b == 0 or b == 1:
+                            if b == 0:
                                 if pontos_fixos[i][j][0] == 3:
                                     qtd_bombas[0] += 1
                                 elif pontos_fixos[i][j][0] == 4:
@@ -173,17 +259,59 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
                                 elif pontos_fixos[i][j][0] == 7:
                                     velocidades[0] += 0.5
                                 pontos_fixos[i][j][0] = 0
+                            elif b == 1:
+                                if pontos_fixos[i][j][0] == 3:
+                                    qtd_bombas[1] += 1
+                                elif pontos_fixos[i][j][0] == 4:
+                                    tamanho_fogo[1] += 1
+                                elif pontos_fixos[i][j][0] == 5:
+                                    escudo[1] += 1
+                                elif pontos_fixos[i][j][0] == 6:
+                                    pode_chutar[1] = True
+                                elif pontos_fixos[i][j][0] == 7:
+                                    velocidades[1] += 0.5
+                                pontos_fixos[i][j][0] = 0
                             return val
 
     return 0
 
 def Menu():
-    pass
+    global placar
+    mostrando = -1
+    placar = [0, 0]
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return 1
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_i: #sair
+                    return 1
 
+        tela.blit(imgs_menu[0], (0, 0))
+        psmouse = pygame.mouse.get_pos()
+
+        if 489 <= psmouse[0] <= 855 and 304 <= psmouse[1] <= 400:
+            if pygame.mouse.get_pressed()[0]:
+                return 0
+            tela.blit(imgs_menu[1], (489, 304))
+        else:
+            tela.blit(imgs_menu[2], (489, 304))
+
+        if pygame.mouse.get_pressed()[0]:
+            if 53 <= psmouse[0] <= 161 and 642 <= psmouse[1] <= 667:
+                mostrando *= -1
+                time.sleep(0.2)
+
+        if mostrando == 1:
+            tela.blit(imgs_menu[3], (200, 440))
+        pygame.display.update()
+
+    return 0
 def Inicio_Listas():
-    global matriz, pontos_fixos, bomber, monstros
+    global matriz, pontos_fixos, bomber, monstros, bombas
     matriz = []
     pontos_fixos = []
+    bombas = []
 
     bomber[0][1], bomber[0][2] = 64, 64
     bomber[1][1], bomber[1][2] = 1088, 576
@@ -229,10 +357,10 @@ def Inicio_Listas():
             i -= 1
         else:
             if contador < 10:
-                pontos_fixos[x][y] = [0, randint(3, 7)]
+                pontos_fixos[x][y] = [2, randint(3, 7)]
                 contador += 1
             else:
-                pontos_fixos[x][y] = [0, -1]
+                pontos_fixos[x][y] = [2, -1]
     
     for bb in bomber:
         for i in range(len(pontos_fixos)):
@@ -241,17 +369,17 @@ def Inicio_Listas():
                     if pontos_fixos[i][j][0] == 2:
                         pontos_fixos[i][j] = [0]
 
-def Principal(x=0):
+def Principal():
     global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo
     loop = True
     Inicio_Listas()
     ok_press = [True, True]
     v_and, v_and2 = 27, 27
     #reset nas variaveis
-    velocidades = [4, 3]
-    qtd_bombas = [2, 1]
-    pode_chutar = [True, False]
-    tamanho_fogo = [3, 1]
+    velocidades = [3, 3]
+    qtd_bombas = [1, 1]
+    pode_chutar = [False, False]
+    tamanho_fogo = [1, 1]
     escudo = [0, 0]
 
     sair_bomba = [True, True]
@@ -263,9 +391,9 @@ def Principal(x=0):
                 if event.key == pygame.K_i: #sair
                     loop = False
                 if event.key == pygame.K_o: #resetar fase
-                    return 0
+                    return 2
                 if event.key == pygame.K_p: #voltar pro menu
-                    return 1
+                    return 3
         key = pygame.key.get_pressed()
 
         if sair_bomba[0] == False:
@@ -281,10 +409,11 @@ def Principal(x=0):
         if key[pygame.K_w]:
             Y -= velocidades[0]
             conseguiu[2] = True
+            bomber[0][0] = 1
         elif key[pygame.K_s]:
             Y += velocidades[0]
             conseguiu[2] = True
-
+            bomber[0][0] = 0
         col = Colisao(X+32, Y+32, 0)
         if col == 0 and conseguiu[2]:
             conseguiu[0] = True
@@ -303,9 +432,11 @@ def Principal(x=0):
         if key[pygame.K_a]:
             X -= velocidades[0]
             conseguiu[3] = True
+            bomber[0][0] = 3
         elif key[pygame.K_d]:
             X += velocidades[0]
             conseguiu[3] = True
+            bomber[0][0] = 2
 
         col = Colisao(X+32, bomber[0][2]+32, 0)
         if col == 0 and conseguiu[3]:
@@ -354,8 +485,92 @@ def Principal(x=0):
                 v_and = 27
 
         #-----------------------------------------fim personagem 1
+
+        #-----------------------------------------personagem 2
+        conseguiu = [False, False, False, False]
+        X, Y = bomber[1][1], bomber[1][2]
+        if key[pygame.K_UP]:
+            Y -= velocidades[1]
+            conseguiu[2] = True
+            bomber[1][0] = 1
+        elif key[pygame.K_DOWN]:
+            Y += velocidades[1]
+            conseguiu[2] = True
+            bomber[1][0] = 0
+        col = Colisao(X+32, Y+32, 1)
+        if col == 0 and conseguiu[2]:
+            conseguiu[0] = True
+        else:
+            if col == 11 and sair_bomba[1] and pode_chutar[1]:
+                bmaisp = Bomba_Mais_Proxima(1)
+                if bmaisp != -1:
+                    if Y > bomber[1][2] and X == bomber[1][1]:
+                        bombas[bmaisp][6] = 3
+                    elif Y < bomber[1][2] and X == bomber[1][1]:
+                        bombas[bmaisp][6] = 4
+                    elif X > bomber[1][1] and Y == bomber[1][2]:
+                        bombas[bmaisp][6] = 1
+                    elif X < bomber[1][1] and Y == bomber[1][2]:
+                        bombas[bmaisp][6] = 2
+        if key[pygame.K_LEFT]:
+            X -= velocidades[1]
+            conseguiu[3] = True
+            bomber[1][0] = 3
+        elif key[pygame.K_RIGHT]:
+            X += velocidades[1]
+            conseguiu[3] = True
+            bomber[1][0] = 2
+
+        col = Colisao(X+32, bomber[1][2]+32, 1)
+        if col == 0 and conseguiu[3]:
+            conseguiu[1] = True
+        else:
+            if col == 11 and sair_bomba[1] and pode_chutar[1]:
+                bmaisp = Bomba_Mais_Proxima(1)
+                if bmaisp != -1:
+                    if Y > bomber[1][2] and X == bomber[1][1]:
+                        bombas[bmaisp][6] = 3
+                    elif Y < bomber[1][2] and X == bomber[1][1]:
+                        bombas[bmaisp][6] = 4
+                    elif X > bomber[1][1] and Y == bomber[1][2]:
+                        bombas[bmaisp][6] = 1
+                    elif X < bomber[1][1] and Y == bomber[1][2]:
+                        bombas[bmaisp][6] = 2
+
+        #tratar os dados
+        if conseguiu[0] and conseguiu[1]:
+            bomber[1][1] = X
+            bomber[1][2] = Y
+            v_and2 = 27
+        elif conseguiu[0]:
+            bomber[1][2] = Y
+            v_and2 = 27
+        elif conseguiu[1]:
+            bomber[1][1] = X
+            v_and2 = 27
+        elif conseguiu[2]: #tentou andar
+            if Colisao(X+32+v_and2, bomber[1][2], 1) == 0:
+                bomber[1][1] += velocidades[1]
+            elif Colisao(X+32-v_and2, bomber[1][2], 1) == 0:
+                bomber[1][1] -= velocidades[1]
+
+            v_and2 -= velocidades[1]
+            if v_and2 < 0:
+                v_and2 = 27
+        elif conseguiu[3]: #tentou andar
+            if Colisao(X+32, Y+32+v_and2, 1) == 0:
+                bomber[1][2] += velocidades[1]
+            elif Colisao(X+32, Y+32-v_and2, 1) == 0:
+                bomber[1][2] -= velocidades[1]
+
+            v_and2 -= velocidades[1]
+            if v_and2 < 0:
+                v_and2 = 27
+
+        #-----------------------------------------fim personagem 2
+
         #bombas:
-        if key[pygame.K_x] and ok_press[0]:
+        if key[pygame.K_c] and ok_press[0]:
             if qtd_bombas[0] > 0:
                 pt = Central_Ponto(bomber[0][1], bomber[0][2])
                 bombas.append([imgs[4], matriz[pt[0]][pt[1]], time.time(), 0, 0, [], 0])
@@ -423,13 +638,13 @@ def Principal(x=0):
                     if escudo[0] > 0:
                         escudo[0] -= 1
                     else:
-                        print("morreu")
+                        return 0
                     nao_morreu[0] = False
                 elif a == 9:
                     if escudo[1] > 0:
                         escudo[1] -= 1
                     else:
-                        print("morreu")
+                        return 1
                     nao_morreu[1] = False
                 while contador <= 3:
                     for i in range(1, (tamanho_fogo[0]+1)):
@@ -443,14 +658,14 @@ def Principal(x=0):
                                     if escudo[0] > 0:
                                         escudo[0] -= 1
                                     else:
-                                        print("morreu")
+                                        return 0
                                     nao_morreu[0] = False
                                     break
                                 elif a == 9 and nao_morreu[1]:
                                     if escudo[1] > 0:
                                         escudo[1] -= 1
                                     else:
-                                        print("morreu")
+                                        return 1
                                     nao_morreu[1] = False
                                     break
                                 if pontos_fixos[lc[0]][lc[1]+i][0] != 1:
@@ -473,14 +688,14 @@ def Principal(x=0):
                                         if escudo[0] > 0:
                                             escudo[0] -= 1
                                         else:
-                                            print("morreu")
+                                            return 0
                                         nao_morreu[0] = False
                                         break
                                     elif a == 9 and nao_morreu[1]:
                                         if escudo[1] > 0:
                                             escudo[1] -= 1
                                         else:
-                                            print("morreu")
+                                            return 1
                                         nao_morreu[1] = False
                                         break
                                     if pontos_fixos[lc[0]][lc[1]-i][0] != 1:
@@ -503,14 +718,14 @@ def Principal(x=0):
                                     if escudo[0] > 0:
                                         escudo[0] -= 1
                                     else:
-                                        print("morreu")
+                                        return 0
                                     nao_morreu[0] = False
                                     break
                                 elif a == 9 and nao_morreu[1]:
                                     if escudo[1] > 0:
                                         escudo[1] -= 1
                                     else:
-                                        print("morreu")
+                                        return 1
                                     nao_morreu[1] = False
                                     break
                                 if pontos_fixos[lc[0]+i][lc[1]][0] != 1:
@@ -533,14 +748,14 @@ def Principal(x=0):
                                         if escudo[0] > 0:
                                             escudo[0] -= 1
                                         else:
-                                            print("morreu")
+                                            return 0
                                         nao_morreu[0] = False
                                         break
                                     elif a == 9 and nao_morreu[1]:
                                         if escudo[1] > 0:
                                             escudo[1] -= 1
                                         else:
-                                            print("morreu")
+                                            return 1
                                         nao_morreu[1] = False
                                         break
                                     if pontos_fixos[lc[0]-i][lc[1]][0] != 1:
@@ -569,29 +784,46 @@ def Principal(x=0):
         for i in apagar:
             del(bombas[i])
 
-        for b in bomber:
-            tela.blit(b[0], (b[1], b[2]-19))
+        tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-19))
+        tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-19))
 
+        mostrar_msgs()
         pygame.display.update()
     return -1
 
 qt = True
 while qt:
-    Menu()
-    cont = 0
-    while True:
-        p = Principal(cont)
+    placar = [0, 0]
+    qt2 = True
+    m = Menu()
+    pygame.mixer.music.stop()
+    if m == 1:
+        break
+    while qt2:
+        if placar[0] >= 2:
+            tela.blit(vencedor[0], (372, 325))
+            pygame.display.update()
+            qt2 = False
+            time.sleep(4)
+            continue
+        elif placar[1] >= 2:
+            tela.blit(vencedor[1], (372, 325))
+            pygame.display.update()
+            qt2 = False
+            time.sleep(4)
+            continue
+
+        p = Principal()
         if p == -1:
             qt = False
             break
-        elif p == 0:
-            continue
-        elif p == 1:
-            cont = 0
+        elif p == 3: #voltar menu
             break
-        else:
-            cont += 1
-            #mostra img q perdeu e quem perdeu
-            #da um tempo
+        elif p == 2: #reset
+            continue
+        elif p == 0:
+            placar[1] += 1
+        elif p == 1:
+            placar[0] += 1
 
 pygame.quit()
