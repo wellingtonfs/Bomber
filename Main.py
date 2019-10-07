@@ -265,35 +265,35 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
                         if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
                             return 2
                 elif pontos_fixos[i][j][0] > 2:
-                    if matriz[i][j][0] < p[0] < (matriz[i][j][0] + 64):
-                        if matriz[i][j][1] < p[1] < (matriz[i][j][1] + 64):
-                            val = pontos_fixos[i][j][0]
-                            #colocar os buffs nos bombers
-                            if b == 0:
-                                if pontos_fixos[i][j][0] == 3:
-                                    qtd_bombas[0] += 1
-                                elif pontos_fixos[i][j][0] == 4:
-                                    tamanho_fogo[0] += 1
-                                elif pontos_fixos[i][j][0] == 5:
-                                    escudo[0] += 1
-                                elif pontos_fixos[i][j][0] == 6:
-                                    pode_chutar[0] = True
-                                elif pontos_fixos[i][j][0] == 7:
-                                    velocidades[0] += 0.5
-                                pontos_fixos[i][j][0] = 0
-                            elif b == 1:
-                                if pontos_fixos[i][j][0] == 3:
-                                    qtd_bombas[1] += 1
-                                elif pontos_fixos[i][j][0] == 4:
-                                    tamanho_fogo[1] += 1
-                                elif pontos_fixos[i][j][0] == 5:
-                                    escudo[1] += 1
-                                elif pontos_fixos[i][j][0] == 6:
-                                    pode_chutar[1] = True
-                                elif pontos_fixos[i][j][0] == 7:
-                                    velocidades[1] += 0.5
-                                pontos_fixos[i][j][0] = 0
-                            return val
+                    opt = [matriz[i][j][0] + 32, matriz[i][j][1] + 32]
+                    if Dist([x, y], opt) < 30:
+                        val = pontos_fixos[i][j][0]
+                        #colocar os buffs nos bombers
+                        if b == 0:
+                            if pontos_fixos[i][j][0] == 3:
+                                qtd_bombas[0] += 1
+                            elif pontos_fixos[i][j][0] == 4:
+                                tamanho_fogo[0] += 1
+                            elif pontos_fixos[i][j][0] == 5:
+                                escudo[0] += 1
+                            elif pontos_fixos[i][j][0] == 6:
+                                pode_chutar[0] = True
+                            elif pontos_fixos[i][j][0] == 7:
+                                velocidades[0] += 0.5
+                            pontos_fixos[i][j][0] = 0
+                        elif b == 1:
+                            if pontos_fixos[i][j][0] == 3:
+                                qtd_bombas[1] += 1
+                            elif pontos_fixos[i][j][0] == 4:
+                                tamanho_fogo[1] += 1
+                            elif pontos_fixos[i][j][0] == 5:
+                                escudo[1] += 1
+                            elif pontos_fixos[i][j][0] == 6:
+                                pode_chutar[1] = True
+                            elif pontos_fixos[i][j][0] == 7:
+                                velocidades[1] += 0.5
+                            pontos_fixos[i][j][0] = 0
+                        return val
 
     return 0
 
