@@ -1,6 +1,5 @@
 import pygame, time, math
 from random import randint
-from threading import *
 
 pygame.init()
 
@@ -307,6 +306,7 @@ def Menu():
         pygame.display.update()
 
     return 0
+
 def Inicio_Listas():
     global matriz, pontos_fixos, bomber, monstros, bombas
     matriz = []
@@ -345,7 +345,7 @@ def Inicio_Listas():
 
     #Colocar o resto dos blocos no mapa
     contador = 0
-    for i in range(300):
+    for i in range(30):
         x = randint(1,9)
         y = randint(1,17)
         tr = False
@@ -578,7 +578,7 @@ def Principal():
                 sair_bomba[0] = False
             ok_press[0] = False
         else:
-            if not key[pygame.K_x]:
+            if not key[pygame.K_c]:
                 ok_press[0] = True
 
         if key[pygame.K_m] and ok_press[1]:
