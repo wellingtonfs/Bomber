@@ -80,6 +80,8 @@ penna = [
 ]
 
 fogo = pygame.image.load('Recursos/fogo.png')
+rip = pygame.image.load('Recursos/rip.png')
+venceu = pygame.image.load('Recursos/venceu.png')
 
 pontos_fixos = []
 matriz = []
@@ -952,7 +954,20 @@ while qt:
             continue
         elif p == 0:
             placar[1] += 1
+            tela.blit(penna[0], (bomber[1][1], bomber[1][2]-24))
+            tela.blit(rip, (bomber[0][1]-14, bomber[0][2]-22))
+            tela.blit(rip, (bomber[0][1]-14, bomber[0][2]-22))
+            tela.blit(venceu, (bomber[1][1]-55, bomber[1][2]+20))
+            pygame.display.update()
+            if placar[0] < 2 and placar[1] < 2:
+                time.sleep(2)
         elif p == 1:
             placar[0] += 1
+            tela.blit(cleo[0], (bomber[0][1], bomber[0][2]-24))
+            tela.blit(rip, (bomber[1][1]-14, bomber[1][2]-22))
+            tela.blit(venceu, (bomber[0][1]-55, bomber[0][2]+20))
+            pygame.display.update()
+            if placar[0] < 2 and placar[1] < 2:
+                time.sleep(2)
 
 pygame.quit()
