@@ -184,7 +184,7 @@ def Sair_da_Bomba(b):
     sair = True
     for bb in bombas:
         ptt = [bb[1][0] + 32, bb[1][1] + 32]
-        if Dist(ptt, [bomber[b][1]+32,bomber[b][2]+32]) < 64:
+        if Dist(ptt, [bomber[b][1]+28,bomber[b][2]+28]) < 60:
             sair = False
     if sair:
         return True
@@ -197,7 +197,7 @@ def Bomba_Mais_Proxima(b):
         tam = []
         for bb in range(len(bombas)):
             ptt = [bombas[bb][1][0] + 32, bombas[bb][1][1] + 32]
-            tam.append([Dist(ptt, [bomber[b][1]+32,bomber[b][2]+32]), bb])
+            tam.append([Dist(ptt, [bomber[b][1]+28,bomber[b][2]+28]), bb])
 
         menor = tam[0]
         for t in tam:
@@ -217,40 +217,6 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
         pt = [m[1] + 32, m[2] + 32] #32 = metade da imagem do monstro
         if Dist(pt, [x, y]) < 64:
             return 10
-
-    if b == 0 or b == 1:
-        for bb in bombas:
-            ptt = [bb[1][0] + 32, bb[1][1] + 32]
-            if Dist(ptt, [x,y]) >= 64: #60 = 32 + 28
-                continue
-            if Dist(ptt, [x,y]) <= 20:
-                continue
-            if Dist([x, y], ptt) < Dist([bomber[b][1]+32, bomber[b][2]+32], ptt):
-                return 11
-    else:
-        for bb in range(len(bombas)):
-            ptt = [bombas[bb][1][0] + 32, bombas[bb][1][1] + 32]
-            if Dist(ptt, [x,y]) < 30:
-                continue
-            elif Dist(ptt, [x,y]) < 64:
-                bombas[bb][6] = bombas[int(b-3)][6]
-                return 11
-
-    if b == 0:
-        pt = [bomber[1][1] + 28, bomber[1][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 56:
-            return 9
-    elif b == 1:
-        pt = [bomber[0][1] + 28, bomber[0][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 56:
-            return 8
-    else:
-        pt = [bomber[1][1] + 28, bomber[1][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 56:
-            return 9
-        pt = [bomber[0][1] + 28, bomber[0][2] + 28] #28 = metade da imagem do bomber
-        if Dist(pt, [x, y]) < 56:
-            return 8
 
     pts_lados = [[x-28,y-28], [x+28,y-28], [x+28,y+28], [x-28,y+28]]
     for p in pts_lados:
@@ -295,6 +261,39 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
                             pontos_fixos[i][j][0] = 0
                         return val
 
+    if b == 0 or b == 1:
+        for bb in bombas:
+            ptt = [bb[1][0] + 32, bb[1][1] + 32]
+            if Dist(ptt, [x,y]) >= 60: #60 = 32 + 28
+                continue
+            if Dist(ptt, [x,y]) <= 20:
+                continue
+            if Dist([x, y], ptt) < Dist([bomber[b][1]+28, bomber[b][2]+28], ptt):
+                return 11
+    else:
+        for bb in range(len(bombas)):
+            ptt = [bombas[bb][1][0] + 32, bombas[bb][1][1] + 32]
+            if Dist(ptt, [x,y]) < 30:
+                continue
+            elif Dist(ptt, [x,y]) < 64:
+                bombas[bb][6] = bombas[int(b-3)][6]
+                return 11
+
+    if b == 0:
+        pt = [bomber[1][1] + 28, bomber[1][2] + 28] #28 = metade da imagem do bomber
+        if Dist(pt, [x, y]) < 56:
+            return 9
+    elif b == 1:
+        pt = [bomber[0][1] + 28, bomber[0][2] + 28] #28 = metade da imagem do bomber
+        if Dist(pt, [x, y]) < 56:
+            return 8
+    else:
+        pt = [bomber[1][1] + 28, bomber[1][2] + 28] #28 = metade da imagem do bomber
+        if Dist(pt, [x, y]) < 56:
+            return 9
+        pt = [bomber[0][1] + 28, bomber[0][2] + 28] #28 = metade da imagem do bomber
+        if Dist(pt, [x, y]) < 56:
+            return 8
     return 0
 
 def Menu():
@@ -453,7 +452,7 @@ def Principal():
                 else:
                     bomber[0][0] = 4
                 tempo_imagens[0] = time.time()
-        col = Colisao(X+32, Y+32, 0)
+        col = Colisao(X+28, Y+28, 0)
         if col == 0 and conseguiu[2]:
             conseguiu[0] = True
         else:
@@ -502,7 +501,7 @@ def Principal():
                 else:
                     bomber[0][0] = 3
 
-        col = Colisao(X+32, bomber[0][2]+32, 0)
+        col = Colisao(X+28, bomber[0][2]+28, 0)
         if col == 0 and conseguiu[3]:
             conseguiu[1] = True
         else:
@@ -530,18 +529,18 @@ def Principal():
             bomber[0][1] = X
             v_and = 27
         elif conseguiu[2]: #tentou andar
-            if Colisao(X+32+v_and, bomber[0][2], 0) == 0:
+            if Colisao(X+28+v_and, Y+28, 0) == 0:
                 bomber[0][1] += velocidades[0]
-            elif Colisao(X+32-v_and, bomber[0][2], 0) == 0:
+            elif Colisao(X+28-v_and, Y+28, 0) == 0:
                 bomber[0][1] -= velocidades[0]
 
             v_and -= velocidades[0]
             if v_and < 0:
                 v_and = 27
         elif conseguiu[3]: #tentou andar
-            if Colisao(X+32, Y+32+v_and, 0) == 0:
+            if Colisao(X+28, Y+28+v_and, 0) == 0:
                 bomber[0][2] += velocidades[0]
-            elif Colisao(X+32, Y+32-v_and, 0) == 0:
+            elif Colisao(X+28, Y+28-v_and, 0) == 0:
                 bomber[0][2] -= velocidades[0]
 
             v_and -= velocidades[0]
@@ -575,7 +574,7 @@ def Principal():
                 else:
                     bomber[1][0] = 4
                 tempo_imagens[1] = time.time()
-        col = Colisao(X+32, Y+32, 1)
+        col = Colisao(X+28, Y+28, 1)
         if col == 0 and conseguiu[2]:
             conseguiu[0] = True
         else:
@@ -624,7 +623,7 @@ def Principal():
                 else:
                     bomber[1][0] = 3
 
-        col = Colisao(X+32, bomber[1][2]+32, 1)
+        col = Colisao(X+28, bomber[1][2]+28, 1)
         if col == 0 and conseguiu[3]:
             conseguiu[1] = True
         else:
@@ -652,18 +651,18 @@ def Principal():
             bomber[1][1] = X
             v_and2 = 27
         elif conseguiu[2]: #tentou andar
-            if Colisao(X+32+v_and2, bomber[1][2], 1) == 0:
+            if Colisao(X+28+v_and2, Y+28, 1) == 0:
                 bomber[1][1] += velocidades[1]
-            elif Colisao(X+32-v_and2, bomber[1][2], 1) == 0:
+            elif Colisao(X+28-v_and2, Y+28, 1) == 0:
                 bomber[1][1] -= velocidades[1]
 
             v_and2 -= velocidades[1]
             if v_and2 < 0:
                 v_and2 = 27
         elif conseguiu[3]: #tentou andar
-            if Colisao(X+32, Y+32+v_and2, 1) == 0:
+            if Colisao(X+28, Y+28+v_and2, 1) == 0:
                 bomber[1][2] += velocidades[1]
-            elif Colisao(X+32, Y+32-v_and2, 1) == 0:
+            elif Colisao(X+28, Y+28-v_and2, 1) == 0:
                 bomber[1][2] -= velocidades[1]
 
             v_and2 -= velocidades[1]
@@ -912,11 +911,11 @@ def Principal():
             del(bombas[i])
 
         if bomber[0][2] > bomber[1][2]:
-            tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-19))
-            tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-19))
+            tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-24))
+            tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-24))
         else:
-            tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-19))
-            tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-19))
+            tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-24))
+            tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-24))
 
         mostrar_msgs()
         pygame.display.update()
