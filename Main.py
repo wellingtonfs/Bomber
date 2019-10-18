@@ -26,7 +26,8 @@ itens = [
     pygame.image.load('Recursos/fire.png'),
     pygame.image.load('Recursos/escudo.png'),
     pygame.image.load('Recursos/chute.png'),
-    pygame.image.load('Recursos/bota.png')
+    pygame.image.load('Recursos/bota.png'),
+    pygame.image.load('Recursos/inv.png')
 ]
 
 imgs_menu = [
@@ -46,7 +47,8 @@ miniaturas = [
     pygame.image.load('Recursos/mfogo.png'),
     pygame.image.load('Recursos/mescudo.png'),
     pygame.image.load('Recursos/mchute.png'),
-    pygame.image.load('Recursos/mbota.png')
+    pygame.image.load('Recursos/mbota.png'),
+    pygame.image.load('Recursos/minv.png')
 ]
 
 cleo = [
@@ -97,12 +99,13 @@ qtd_bombas = [1, 1]
 pode_chutar = [False, False]
 tamanho_fogo = [1, 1]
 escudo = [0, 0]
+inv = [[False, 0], [False, 0]]
 
 placar = [0, 0]
 
 def mostrar_msgs():
     global tela, fonte_txt, placar, miniaturas, fonte_txt2
-    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo
+    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo, inv
 
     textoEsct = fonte_txt.render("Placar", 1, (255,255,255))
     tela.blit(textoEsct, (1250, 70))
@@ -112,7 +115,7 @@ def mostrar_msgs():
 
     infos = [qtd_bombas[0], tamanho_fogo[0], escudo[0], pode_chutar[0], velocidades[0]]
 
-    for i in range(5):
+    for i in range(6):
         if i == 3:
             if pode_chutar[0]:
                 msg = "1"
@@ -120,6 +123,11 @@ def mostrar_msgs():
                 msg = "0"
         elif i == 4:
             msg = "%.1f" %infos[i]
+        elif i == 5:
+            if inv[0][0]:
+                msg = "%d" %(30 - (time.time() - inv[0][1]))
+            else:
+                msg = "0"
         else:
             msg = "%d" %infos[i]
 
@@ -129,7 +137,7 @@ def mostrar_msgs():
 
     infos = [qtd_bombas[1], tamanho_fogo[1], escudo[1], pode_chutar[1], velocidades[1]]
 
-    for i in range(5):
+    for i in range(6):
         if i == 3:
             if pode_chutar[1]:
                 msg = "1"
@@ -137,6 +145,11 @@ def mostrar_msgs():
                 msg = "0"
         elif i == 4:
             msg = "%.1f" %infos[i]
+        elif i == 5:
+            if inv[1][0]:
+                msg = "%d" %(30 - (time.time() - inv[1][1]))
+            else:
+                msg = "0"
         else:
             msg = "%d" %infos[i]
 
@@ -213,7 +226,7 @@ def Bomba_Mais_Proxima(b):
 
 def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = monstro
     global pontos_fixos, matriz, bomber, monstros, bombas
-    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo
+    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo, inv
     #se tiver batendo num monstro
     for m in monstros:
         pt = [m[1] + 32, m[2] + 32] #32 = metade da imagem do monstro
@@ -248,6 +261,9 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
                                 pode_chutar[0] = True
                             elif pontos_fixos[i][j][0] == 7:
                                 velocidades[0] += 0.5
+                            elif pontos_fixos[i][j][0] == 8:
+                                inv[0][0] = True
+                                inv[0][1] = time.time()
                             pontos_fixos[i][j][0] = 0
                         elif b == 1:
                             if pontos_fixos[i][j][0] == 3:
@@ -260,6 +276,9 @@ def Colisao(x, y, b): #0 = nada. 1 = bloco fixo. 2 = bloco. 3 = personagem. 4 = 
                                 pode_chutar[1] = True
                             elif pontos_fixos[i][j][0] == 7:
                                 velocidades[1] += 0.5
+                            elif pontos_fixos[i][j][0] == 8:
+                                inv[1][0] = True
+                                inv[1][1] = time.time()
                             pontos_fixos[i][j][0] = 0
                         return val
 
@@ -382,7 +401,7 @@ def Inicio_Listas():
             i -= 1
         else:
             if contador < 15:
-                pontos_fixos[x][y] = [2, randint(3, 7)]
+                pontos_fixos[x][y] = [2, randint(3, 8)]
                 contador += 1
             else:
                 pontos_fixos[x][y] = [2, -1]
@@ -395,7 +414,7 @@ def Inicio_Listas():
                         pontos_fixos[i][j] = [0]
 
 def Principal():
-    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo
+    global velocidades, qtd_bombas, pode_chutar, tamanho_fogo, escudo, inv
     loop = True
     Inicio_Listas()
     ok_press = [True, True]
@@ -407,6 +426,7 @@ def Principal():
     pode_chutar = [False, False]
     tamanho_fogo = [1, 1]
     escudo = [0, 0]
+    inv = [[False, 0], [False, 0]]
 
     sair_bomba = [True, True]
     while loop:
@@ -742,13 +762,15 @@ def Principal():
                     if escudo[0] > 0:
                         escudo[0] -= 1
                     else:
-                        return 0
+                        if not inv[0][0]:
+                            return 0
                     nao_morreu[0] = False
                 elif a == 9:
                     if escudo[1] > 0:
                         escudo[1] -= 1
                     else:
-                        return 1
+                        if not inv[1][0]:
+                            return 1
                     nao_morreu[1] = False
                 if bombas[b][3] == 0:
                     tmf = tamanho_fogo[0]
@@ -766,14 +788,16 @@ def Principal():
                                     if escudo[0] > 0:
                                         escudo[0] -= 1
                                     else:
-                                        return 0
+                                        if not inv[0][0]:
+                                            return 0
                                     nao_morreu[0] = False
                                     break
                                 elif a == 9 and nao_morreu[1]:
                                     if escudo[1] > 0:
                                         escudo[1] -= 1
                                     else:
-                                        return 1
+                                        if not inv[1][0]:
+                                            return 1
                                     nao_morreu[1] = False
                                     break
                                 if pontos_fixos[lc[0]][lc[1]+i][0] != 1:
@@ -801,14 +825,16 @@ def Principal():
                                         if escudo[0] > 0:
                                             escudo[0] -= 1
                                         else:
-                                            return 0
+                                            if not inv[0][0]:
+                                                return 0
                                         nao_morreu[0] = False
                                         break
                                     elif a == 9 and nao_morreu[1]:
                                         if escudo[1] > 0:
                                             escudo[1] -= 1
                                         else:
-                                            return 1
+                                            if not inv[1][0]:
+                                                return 1
                                         nao_morreu[1] = False
                                         break
                                     if pontos_fixos[lc[0]][lc[1]-i][0] != 1:
@@ -836,14 +862,16 @@ def Principal():
                                     if escudo[0] > 0:
                                         escudo[0] -= 1
                                     else:
-                                        return 0
+                                        if not inv[0][0]:
+                                            return 0
                                     nao_morreu[0] = False
                                     break
                                 elif a == 9 and nao_morreu[1]:
                                     if escudo[1] > 0:
                                         escudo[1] -= 1
                                     else:
-                                        return 1
+                                        if not inv[1][0]:
+                                            return 1
                                     nao_morreu[1] = False
                                     break
                                 if pontos_fixos[lc[0]+i][lc[1]][0] != 1:
@@ -861,6 +889,7 @@ def Principal():
                                         break
                                 else:
                                     break
+
                             if contador == 3:
                                 if (lc[0]-i) >= 0:
                                     c = explosao(lc[0]-i, lc[1], b) 
@@ -871,14 +900,16 @@ def Principal():
                                         if escudo[0] > 0:
                                             escudo[0] -= 1
                                         else:
-                                            return 0
+                                            if not inv[0][0]:
+                                                return 0
                                         nao_morreu[0] = False
                                         break
                                     elif a == 9 and nao_morreu[1]:
                                         if escudo[1] > 0:
                                             escudo[1] -= 1
                                         else:
-                                            return 1
+                                            if not inv[1][0]:
+                                                return 1
                                         nao_morreu[1] = False
                                         break
                                     if pontos_fixos[lc[0]-i][lc[1]][0] != 1:
@@ -918,6 +949,16 @@ def Principal():
         else:
             tela.blit(cleo[bomber[0][0]], (bomber[0][1], bomber[0][2]-24))
             tela.blit(penna[bomber[1][0]], (bomber[1][1], bomber[1][2]-24))
+
+        if inv[0][0]:
+            if (time.time() - inv[0][1]) > 30:
+                inv[0][1] = 0
+                inv[0][0] = False
+
+        if inv[1][0]:
+            if (time.time() - inv[1][1]) > 30:
+                inv[1][1] = 0
+                inv[1][0] = False
 
         mostrar_msgs()
         pygame.display.update()
